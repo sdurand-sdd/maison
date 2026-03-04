@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Mes Courses</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f4ef;
+  --surface: #ffffff;
+  --surface2: #f0ece4;
+  --border: rgba(0,0,0,0.08);
+  --text: #1e1b16;
+  --text2: #6b6456;
+  --text3: #a89e92;
+  --green: #3d9970;
+  --green-light: #e8f5ef;
+  --red: #e05c5c;
+  --yellow: #f5a623;
+  --shadow: 0 2px 16px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.14);
+  --radius: 16px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  min-height: 100dvh;
+  font-size: 16px;
+  overscroll-behavior: none;
+}
+
+/* ── HEADER ── */
+.app-header {
+  background: var(--green);
+  color: white;
+  padding: 16px 20px 14px;
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 2px 12px rgba(61,153,112,0.3);
+}
+.app-header h1 { font-size: 1.25rem; font-weight: 800; flex: 1; letter-spacing: -0.3px; }
+.header-count { font-size: 0.8rem; font-weight: 600; opacity: 0.8; background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 12px; }
+
+.sync-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.4); transition: background 0.3s; flex-shrink: 0; }
+.sync-dot.ok { background: #a8e6c8; }
+.sync-dot.err { background: #ffaaaa; }
+.sync-dot.loading { background: #ffe08a; animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.hbtn { background: rgba(255,255,255,0.2); border: none; border-radius: 8px; color: white; padding: 6px 10px; font-size: 0.85rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+.hbtn:active { background: rgba(255,255,255,0.35); }
+
+/* ── TABS ── */
+.tabs {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: calc(56px + env(safe-area-inset-top, 0px));
+  z-index: 49;
+}
+.tab {
+  flex: 1;
+  padding: 12px 8px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text3);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.15s;
+}
+.tab.active { color: var(--green); border-bottom-color: var(--green); }
+
+/* ── MAIN ── */
+.main { padding: 16px 16px calc(100px + var(--safe-bottom)); max-width: 600px; margin: 0 auto; }
+
+/* ── ADD BAR ── */
+.add-bar {
+  display: flex;
+  gap: 8px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+  align-items: center;
+}
+.add-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  background: transparent;
+  min-width: 0;
+}
+.add-bar input::placeholder { color: var(--text3); font-weight: 400; }
+
+.qty-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 4px 8px;
+  flex-shrink: 0;
+}
+.qty-btn {
+  background: none;
+  border: none;
+  color: var(--text2);
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background 0.1s;
+  line-height: 1;
+}
+.qty-btn:active { background: var(--border); }
+.qty-val { font-size: 0.9rem; font-weight: 800; color: var(--text); min-width: 20px; text-align: center; }
+
+.add-submit {
+  background: var(--green);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  width: 36px;
+  height: 36px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  font-weight: 700;
+}
+.add-submit:active { transform: scale(0.92); }
+
+/* ── ITEM ── */
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow);
+  transition: opacity 0.3s, transform 0.2s;
+  position: relative;
+  touch-action: pan-y;
+}
+.item.checked {
+  opacity: 0.45;
+}
+.item.checked .item-name { text-decoration: line-through; color: var(--text3); }
+
+.item-cb {
+  appearance: none;
+  width: 26px; height: 26px;
+  border: 2.5px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  transition: all 0.2s;
+  background: white;
+}
+.item-cb:checked {
+  background: var(--green);
+  border-color: var(--green);
+}
+.item-cb:checked::after {
+  content: '';
+  position: absolute;
+  left: 6px; top: 3px;
+  width: 7px; height: 11px;
+  border: 2.5px solid white;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+
+.item-body { flex: 1; min-width: 0; }
+.item-name { font-size: 0.97rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item-qty { font-size: 0.78rem; font-weight: 600; color: var(--text3); margin-top: 1px; }
+
+.item-fav-btn {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px;
+  opacity: 0.4;
+  transition: opacity 0.15s, transform 0.15s;
+  line-height: 1;
+}
+.item-fav-btn.active { opacity: 1; }
+.item-fav-btn:active { transform: scale(1.3); }
+
+.item-del {
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 8px;
+  transition: all 0.15s;
+  line-height: 1;
+}
+.item-del:active { background: #fde8e8; color: var(--red); }
+
+/* ── SECTION HEADER ── */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 16px 0 8px;
+}
+.section-title { font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); }
+.section-action { font-size: 0.78rem; font-weight: 700; color: var(--red); cursor: pointer; padding: 4px 8px; border-radius: 8px; }
+.section-action:active { background: #fde8e8; }
+
+/* ── FAVORITES ── */
+.favs-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+.fav-chip {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 7px 14px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text2);
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.fav-chip:active { background: var(--green-light); border-color: var(--green); color: var(--green); transform: scale(0.96); }
+.fav-chip.in-list { background: var(--green-light); border-color: var(--green); color: var(--green); }
+.fav-chip-del { font-size: 0.75rem; opacity: 0.5; margin-left: 2px; }
+
+/* ── EMPTY ── */
+.empty {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text3);
+}
+.empty-icon { font-size: 3rem; margin-bottom: 12px; }
+.empty-text { font-size: 0.9rem; font-weight: 600; line-height: 1.6; }
+
+/* ── FAB (floating action) ── */
+.fab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0; right: 0;
+  padding: 12px 16px;
+  padding-bottom: calc(12px + var(--safe-bottom));
+  background: linear-gradient(transparent, var(--bg) 40%);
+  display: flex;
+  gap: 10px;
+  max-width: 600px;
+  margin: 0 auto;
+  pointer-events: none;
+}
+.fab-bar > * { pointer-events: all; }
+.fab-clear {
+  flex: 1;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text2);
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: all 0.15s;
+}
+.fab-clear:active { background: #fde8e8; color: var(--red); }
+
+/* ── CONFIG / LOGIN / MODAL screens ── */
+.fullscreen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  padding-top: calc(24px + env(safe-area-inset-top, 0px));
+}
+.fullscreen.show { display: flex; }
+
+.screen-box {
+  background: var(--surface);
+  border-radius: 24px;
+  padding: 32px 28px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+}
+.screen-box h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 6px; color: var(--text); }
+.screen-box .sub { font-size: 0.85rem; color: var(--text3); margin-bottom: 24px; line-height: 1.5; }
+.screen-box ol { font-size: 0.83rem; color: var(--text2); line-height: 2; padding-left: 20px; margin-bottom: 20px; }
+.screen-box code { background: var(--bg); padding: 2px 6px; border-radius: 6px; font-family: monospace; font-size: 0.8rem; color: var(--green); font-weight: 700; }
+
+.sfield { margin-bottom: 14px; }
+.sfield label { display: block; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text3); margin-bottom: 6px; }
+.sfield input, .sfield textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.sfield input:focus, .sfield textarea:focus { border-color: var(--green); }
+.sfield textarea { min-height: 140px; resize: vertical; font-weight: 400; line-height: 1.6; font-size: 0.82rem; font-family: monospace; }
+
+.screen-error { color: var(--red); font-size: 0.82rem; margin-bottom: 12px; min-height: 18px; font-weight: 600; }
+
+.screen-btn {
+  width: 100%;
+  background: var(--green);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 14px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-top: 4px;
+}
+.screen-btn:active { transform: scale(0.98); }
+.screen-btn:disabled { opacity: 0.5; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: calc(90px + var(--safe-bottom));
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--text);
+  color: white;
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  z-index: 999;
+  opacity: 0;
+  transition: all 0.25s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- CONFIG SCREEN -->
+<div class="fullscreen" id="configScreen" style="display:none;align-items:flex-start;overflow-y:auto">
+  <div class="screen-box" style="margin:auto">
+    <h2>🛒 Mes Courses</h2>
+    <p class="sub">Connectez Firebase pour synchroniser vos listes entre téléphone et ordinateur.</p>
+    <ol>
+      <li>console.firebase.google.com → votre projet</li>
+      <li><strong>Firestore Database</strong> → créer (mode test ou production)</li>
+      <li>⚙️ Paramètres → <strong>Vos applications</strong> → icône <code>&lt;/&gt;</code></li>
+      <li>Copiez le bloc <code>firebaseConfig</code></li>
+    </ol>
+    <div class="sfield">
+      <label>Configuration Firebase</label>
+      <textarea id="fbConfigInput" placeholder="Collez ici le firebaseConfig (format JS ou JSON)"></textarea>
+    </div>
+    <div class="screen-error" id="configError"></div>
+    <button class="screen-btn" onclick="connectFirebase()">Connecter →</button>
+  </div>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div class="fullscreen" id="loginScreen">
+  <div class="screen-box">
+    <h2>🛒 Mes Courses</h2>
+    <p class="sub">Connectez-vous pour accéder à vos listes</p>
+    <div class="sfield">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="votre@email.com" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="sfield">
+      <label>Mot de passe</label>
+      <input type="password" id="loginPwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="screen-error" id="loginError"></div>
+    <button class="screen-btn" id="loginBtn" onclick="doLogin()">Se connecter</button>
+    <button style="width:100%;background:none;border:none;color:var(--text3);font-family:inherit;font-size:0.8rem;font-weight:600;margin-top:14px;cursor:pointer;padding:6px" onclick="showConfig()">⚙️ Changer la config Firebase</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+  <div class="app-header">
+    <h1>🛒 Mes Courses</h1>
+    <span class="header-count" id="headerCount"></span>
+    <div class="sync-dot" id="syncDot"></div>
+    <button class="hbtn" onclick="doLogout()">⎋</button>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tabListBtn" onclick="switchTab('list')">📋 Liste</div>
+    <div class="tab" id="tabFavBtn" onclick="switchTab('favs')">⭐ Favoris</div>
+  </div>
+
+  <!-- LIST TAB -->
+  <div class="main" id="tabList">
+    <div class="add-bar">
+      <input type="text" id="addInput" placeholder="Ajouter un article…" onkeydown="if(event.key==='Enter')addItem()">
+      <div class="qty-control">
+        <button class="qty-btn" onclick="changeQty(-1)">−</button>
+        <span class="qty-val" id="qtyVal">1</span>
+        <button class="qty-btn" onclick="changeQty(1)">+</button>
+      </div>
+      <button class="add-submit" onclick="addItem()">+</button>
+    </div>
+
+    <!-- Quick favs strip -->
+    <div id="quickFavsStrip"></div>
+
+    <div id="listItems"></div>
+  </div>
+
+  <!-- FAVS TAB -->
+  <div class="main" id="tabFavs" style="display:none">
+    <p style="font-size:0.82rem;color:var(--text3);font-weight:600;margin-bottom:14px;line-height:1.5">
+      ⭐ Vos articles favoris apparaissent ici et en raccourci dans la liste.<br>
+      Marquez un article comme favori avec l'étoile ☆ lors de l'ajout.
+    </p>
+    <div id="favsGrid"></div>
+  </div>
+
+  <div class="fab-bar" id="fabBar" style="display:none">
+    <button class="fab-clear" onclick="clearChecked()">🗑 Effacer les articles cochés</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let db = null, auth = null;
+let data = { items: [], favs: [] };
+let currentQty = 1;
+let currentTab = 'list';
+
+// ── FIREBASE ──────────────────────────────────────────────────────────────────
+window.connectFirebase = async function() {
+  const raw = document.getElementById('fbConfigInput').value.trim();
+  const errEl = document.getElementById('configError');
+  errEl.textContent = '';
+  try {
+    const cfg = parseConfig(raw);
+    localStorage.setItem('fbConfig', JSON.stringify(cfg));
+    await bootApp(cfg);
+  } catch(e) { errEl.textContent = '⚠️ ' + e.message; }
+};
+
+function parseConfig(raw) {
+  try { return JSON.parse(raw); } catch(e) {}
+  let s = raw.replace(/^\s*const\s+\w+\s*=\s*/, '').replace(/;\s*$/, '').trim();
+  s = s.replace(/([{,]\s*)([a-zA-Z_]\w*)(\s*:)/g, '$1"$2"$3');
+  s = s.replace(/:\s*'([^']*)'/g, ': "$1"');
+  try { return JSON.parse(s); } catch(e) { throw new Error('Format non reconnu — copiez le bloc { ... } depuis Firebase'); }
+}
+
+async function bootApp(cfg) {
+  setSyncState('loading');
+  try {
+    const app = initializeApp(cfg);
+    db = getFirestore(app);
+    auth = getAuth(app);
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        document.getElementById('loginScreen').classList.remove('show');
+        document.getElementById('app').style.display = '';
+        startListener();
+      } else {
+        document.getElementById('loginScreen').classList.add('show');
+        document.getElementById('app').style.display = 'none';
+        setSyncState('err');
+      }
+    });
+  } catch(e) {
+    setSyncState('err');
+    document.getElementById('configError').textContent = '⚠️ ' + e.message;
+    showConfig();
+  }
+}
+
+function startListener() {
+  onSnapshot(doc(db, 'courses', 'data'), snap => {
+    data = snap.exists() ? snap.data() : { items: [], favs: [] };
+    if (!data.items) data.items = [];
+    if (!data.favs) data.favs = [];
+    render();
+    setSyncState('ok');
+  }, () => setSyncState('err'));
+}
+
+async function save() {
+  if (!db) return;
+  setSyncState('loading');
+  try {
+    await setDoc(doc(db, 'courses', 'data'), data);
+    setSyncState('ok');
+  } catch(e) { setSyncState('err'); }
+}
+
+// Auto-connect
+const saved = localStorage.getItem('fbConfig');
+if (saved) { try { bootApp(JSON.parse(saved)); } catch(e) {} }
+else { showConfig(); }
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function render() {
+  renderList();
+  renderQuickFavs();
+  renderFavsTab();
+  updateHeader();
+}
+
+function renderList() {
+  const container = document.getElementById('listItems');
+  const pending = data.items.filter(i => !i.checked);
+  const checked = data.items.filter(i => i.checked);
+
+  let html = '';
+
+  if (pending.length === 0 && checked.length === 0) {
+    html = `<div class="empty">
+      <div class="empty-icon">🛍️</div>
+      <div class="empty-text">Votre liste est vide !<br>Ajoutez des articles ci-dessus<br>ou pichez dans vos favoris ⭐</div>
+    </div>`;
+  } else {
+    html += pending.map(i => renderItem(i)).join('');
+    if (checked.length > 0) {
+      html += `<div class="section-header">
+        <span class="section-title">✓ Dans le panier (${checked.length})</span>
+        <span class="section-action" onclick="clearChecked()">Effacer</span>
+      </div>`;
+      html += checked.map(i => renderItem(i)).join('');
+    }
+  }
+
+  container.innerHTML = html;
+
+  // Show/hide FAB
+  document.getElementById('fabBar').style.display = checked.length > 0 ? '' : 'none';
+}
+
+function renderItem(item) {
+  const isFav = data.favs.some(f => f.name.toLowerCase() === item.name.toLowerCase());
+  const qtyLabel = item.qty && item.qty !== 1 ? `<div class="item-qty">× ${item.qty}</div>` : '';
+  return `<div class="item ${item.checked ? 'checked' : ''}" id="item-${item.id}">
+    <input type="checkbox" class="item-cb" ${item.checked ? 'checked' : ''} onchange="toggleItem('${item.id}')">
+    <div class="item-body">
+      <div class="item-name">${esc(item.name)}</div>
+      ${qtyLabel}
+    </div>
+    <button class="item-fav-btn ${isFav ? 'active' : ''}" onclick="toggleFav('${item.id}')" title="${isFav ? 'Retirer des favoris' : 'Ajouter aux favoris'}">${isFav ? '⭐' : '☆'}</button>
+    <button class="item-del" onclick="deleteItem('${item.id}')">✕</button>
+  </div>`;
+}
+
+function renderQuickFavs() {
+  const strip = document.getElementById('quickFavsStrip');
+  if (!data.favs || data.favs.length === 0) { strip.innerHTML = ''; return; }
+
+  const inListNames = new Set(data.items.filter(i => !i.checked).map(i => i.name.toLowerCase()));
+  strip.innerHTML = `<div class="favs-grid">` +
+    data.favs.map(f => {
+      const inList = inListNames.has(f.name.toLowerCase());
+      return `<span class="fav-chip ${inList ? 'in-list' : ''}" onclick="addFavToList('${esc(f.name)}')">
+        ${inList ? '✓' : '+'} ${esc(f.name)}
+      </span>`;
+    }).join('') + `</div>`;
+}
+
+function renderFavsTab() {
+  const container = document.getElementById('favsGrid');
+  if (!data.favs || data.favs.length === 0) {
+    container.innerHTML = `<div class="empty">
+      <div class="empty-icon">⭐</div>
+      <div class="empty-text">Pas encore de favoris.<br>Ajoutez un article à la liste puis<br>tapez l'étoile ☆ pour le mémoriser.</div>
+    </div>`;
+    return;
+  }
+  container.innerHTML = `<div class="favs-grid">` +
+    data.favs.map(f => `
+      <span class="fav-chip" onclick="addFavToList('${esc(f.name)}')">
+        ⭐ ${esc(f.name)}
+        <span class="fav-chip-del" onclick="event.stopPropagation();removeFav('${esc(f.name)}')">✕</span>
+      </span>`
+    ).join('') + `</div>`;
+}
+
+function updateHeader() {
+  const n = data.items.filter(i => !i.checked).length;
+  document.getElementById('headerCount').textContent = n > 0 ? `${n} article${n>1?'s':''}` : 'Liste vide';
+}
+
+// ── ACTIONS ───────────────────────────────────────────────────────────────────
+window.addItem = function() {
+  const inp = document.getElementById('addInput');
+  const name = inp.value.trim();
+  if (!name) return;
+  data.items.unshift({ id: uid(), name, qty: currentQty, checked: false, addedAt: Date.now() });
+  inp.value = '';
+  currentQty = 1;
+  document.getElementById('qtyVal').textContent = '1';
+  save();
+  inp.focus();
+};
+
+window.changeQty = function(d) {
+  currentQty = Math.max(1, currentQty + d);
+  document.getElementById('qtyVal').textContent = currentQty;
+};
+
+window.toggleItem = function(id) {
+  const item = data.items.find(i => i.id === id);
+  if (item) { item.checked = !item.checked; item.checkedAt = item.checked ? Date.now() : null; }
+  save();
+};
+
+window.deleteItem = function(id) {
+  data.items = data.items.filter(i => i.id !== id);
+  save();
+};
+
+window.clearChecked = function() {
+  data.items = data.items.filter(i => !i.checked);
+  save();
+  toast('Articles cochés supprimés');
+};
+
+window.toggleFav = function(itemId) {
+  const item = data.items.find(i => i.id === itemId);
+  if (!item) return;
+  const idx = data.favs.findIndex(f => f.name.toLowerCase() === item.name.toLowerCase());
+  if (idx >= 0) {
+    data.favs.splice(idx, 1);
+    toast(`"${item.name}" retiré des favoris`);
+  } else {
+    data.favs.push({ name: item.name });
+    toast(`"${item.name}" ajouté aux favoris ⭐`);
+  }
+  save();
+};
+
+window.addFavToList = function(name) {
+  const alreadyPending = data.items.find(i => i.name.toLowerCase() === name.toLowerCase() && !i.checked);
+  if (alreadyPending) { toast(`"${name}" est déjà dans la liste`); return; }
+  data.items.unshift({ id: uid(), name, qty: 1, checked: false, addedAt: Date.now() });
+  save();
+  // Switch to list tab to see it appear
+  if (currentTab !== 'list') switchTab('list');
+};
+
+window.removeFav = function(name) {
+  data.favs = data.favs.filter(f => f.name.toLowerCase() !== name.toLowerCase());
+  save();
+};
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+window.switchTab = function(tab) {
+  currentTab = tab;
+  document.getElementById('tabList').style.display = tab === 'list' ? '' : 'none';
+  document.getElementById('tabFavs').style.display = tab === 'favs' ? '' : 'none';
+  document.getElementById('tabListBtn').classList.toggle('active', tab === 'list');
+  document.getElementById('tabFavBtn').classList.toggle('active', tab === 'favs');
+};
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+window.doLogin = async function() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pwd = document.getElementById('loginPwd').value;
+  const errEl = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtn');
+  errEl.textContent = '';
+  btn.disabled = true; btn.textContent = 'Connexion…';
+  try {
+    await signInWithEmailAndPassword(auth, email, pwd);
+  } catch(e) {
+    const msgs = {
+      'auth/invalid-credential': 'Email ou mot de passe incorrect',
+      'auth/invalid-email': 'Email invalide',
+      'auth/too-many-requests': 'Trop de tentatives, réessayez plus tard',
+    };
+    errEl.textContent = msgs[e.code] || ('Erreur : ' + e.message);
+  } finally { btn.disabled = false; btn.textContent = 'Se connecter'; }
+};
+
+window.doLogout = async function() {
+  if (auth) await signOut(auth);
+};
+
+window.showConfig = function() {
+  document.getElementById('loginScreen').classList.remove('show');
+  document.getElementById('configScreen').classList.add('show');
+};
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function setSyncState(state) {
+  document.getElementById('syncDot').className = 'sync-dot ' + state;
+}
+function toast(msg, dur=2200) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), dur);
+}
+function uid() { return Math.random().toString(36).slice(2,10); }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+</script>
+</body>
+</html>

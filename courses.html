@@ -555,7 +555,7 @@ function renderList() {
   if (pending.length === 0 && checked.length === 0) {
     html = `<div class="empty">
       <div class="empty-icon">🛍️</div>
-      <div class="empty-text">Votre liste est vide !<br>Ajoutez des articles ci-dessus<br>ou pichez dans vos favoris ⭐</div>
+      <div class="empty-text">Votre liste est vide !<br>Ajoutez des articles ci-dessus<br>ou piochez dans vos favoris ⭐</div>
     </div>`;
   } else {
     html += pending.map(i => renderItem(i)).join('');

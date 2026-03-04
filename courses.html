@@ -400,7 +400,7 @@ body {
 <body>
 
 <!-- CONFIG SCREEN -->
-<div class="fullscreen" id="configScreen" style="display:none;align-items:flex-start;overflow-y:auto">
+<div class="fullscreen" id="configScreen" style="align-items:flex-start;overflow-y:auto">
   <div class="screen-box" style="margin:auto">
     <h2>🛒 Mes Courses</h2>
     <p class="sub">Connectez Firebase pour synchroniser vos listes entre téléphone et ordinateur.</p>
@@ -420,7 +420,7 @@ body {
 </div>
 
 <!-- LOGIN SCREEN -->
-<div class="fullscreen" id="loginScreen">
+<div class="fullscreen" id="loginScreen" style="display:none">
   <div class="screen-box">
     <h2>🛒 Mes Courses</h2>
     <p class="sub">Connectez-vous pour accéder à vos listes</p>
@@ -529,6 +529,7 @@ async function bootApp(cfg) {
         document.getElementById('app').style.display = '';
         startListener();
       } else {
+        document.getElementById('loginScreen').style.display = 'flex';
         document.getElementById('loginScreen').classList.add('show');
         document.getElementById('app').style.display = 'none';
         setSyncState('err');
@@ -583,7 +584,7 @@ function renderList() {
   if (pending.length === 0 && checked.length === 0) {
     html = `<div class="empty">
       <div class="empty-icon">🛍️</div>
-      <div class="empty-text">Votre liste est vide !<br>Ajoutez des articles ci-dessus<br>ou piochez dans vos favoris ⭐</div>
+      <div class="empty-text">Votre liste est vide !<br>Ajoutez des articles ci-dessus<br>ou pichez dans vos favoris ⭐</div>
     </div>`;
   } else {
     html += pending.map(i => renderItem(i)).join('');
@@ -751,6 +752,7 @@ window.doLogout = async function() {
 
 window.showConfig = function() {
   document.getElementById('loginScreen').classList.remove('show');
+  document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('configScreen').classList.add('show');
 };
 

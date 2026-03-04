@@ -399,21 +399,6 @@ body {
 </head>
 <body>
 
-<!-- CONFIG SCREEN -->
-<div class="fullscreen" id="configScreen" style="align-items:flex-start;overflow-y:auto">
-  <div class="screen-box" style="margin:auto">
-    <h2>🛒 Mes Courses</h2>
-    <p class="sub">Connectez Firebase pour synchroniser vos listes entre téléphone et ordinateur.</p>
-    <ol>
-      <li>console.firebase.google.com → votre projet</li>
-      <li><strong>Firestore Database</strong> → créer (mode test ou production)</li>
-      <li>⚙️ Paramètres → <strong>Vos applications</strong> → icône <code>&lt;/&gt;</code></li>
-      <li>Copiez le bloc <code>firebaseConfig</code></li>
-    </ol>
-    <div class="sfield">
-      <label>Configuration Firebase</label>
-      <textarea id="fbConfigInput" placeholder="Collez ici le firebaseConfig (format JS ou JSON)"></textarea>
-    </div>
     <div class="screen-error" id="configError"></div>
     <button class="screen-btn" onclick="connectFirebase()">Connecter →</button>
   </div>
@@ -434,7 +419,6 @@ body {
     </div>
     <div class="screen-error" id="loginError"></div>
     <button class="screen-btn" id="loginBtn" onclick="doLogin()">Se connecter</button>
-    <button style="width:100%;background:none;border:none;color:var(--text3);font-family:inherit;font-size:0.8rem;font-weight:600;margin-top:14px;cursor:pointer;padding:6px" onclick="showConfig()">⚙️ Changer la config Firebase</button>
   </div>
 </div>
 
@@ -498,24 +482,14 @@ let currentQty = 1;
 let currentTab = 'list';
 
 // ── FIREBASE ──────────────────────────────────────────────────────────────────
-window.connectFirebase = async function() {
-  const raw = document.getElementById('fbConfigInput').value.trim();
-  const errEl = document.getElementById('configError');
-  errEl.textContent = '';
-  try {
-    const cfg = parseConfig(raw);
-    localStorage.setItem('fbConfig', JSON.stringify(cfg));
-    await bootApp(cfg);
-  } catch(e) { errEl.textContent = '⚠️ ' + e.message; }
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCy9ooNIoqpfH8uxzo3_YboWvTqkxAmDgI",
+  authDomain: "todolist-9bab9.firebaseapp.com",
+  projectId: "todolist-9bab9",
+  storageBucket: "todolist-9bab9.firebasestorage.app",
+  messagingSenderId: "209518858392",
+  appId: "1:209518858392:web:5043be46f619d0251c40ed"
 };
-
-function parseConfig(raw) {
-  try { return JSON.parse(raw); } catch(e) {}
-  let s = raw.replace(/^\s*const\s+\w+\s*=\s*/, '').replace(/;\s*$/, '').trim();
-  s = s.replace(/([{,]\s*)([a-zA-Z_]\w*)(\s*:)/g, '$1"$2"$3');
-  s = s.replace(/:\s*'([^']*)'/g, ': "$1"');
-  try { return JSON.parse(s); } catch(e) { throw new Error('Format non reconnu — copiez le bloc { ... } depuis Firebase'); }
-}
 
 async function bootApp(cfg) {
   setSyncState('loading');
@@ -537,8 +511,7 @@ async function bootApp(cfg) {
     });
   } catch(e) {
     setSyncState('err');
-    document.getElementById('configError').textContent = '⚠️ ' + e.message;
-    showConfig();
+    console.error('Firebase init error:', e.message);
   }
 }
 
@@ -561,10 +534,8 @@ async function save() {
   } catch(e) { setSyncState('err'); }
 }
 
-// Auto-connect
-const saved = localStorage.getItem('fbConfig');
-if (saved) { try { bootApp(JSON.parse(saved)); } catch(e) {} }
-else { showConfig(); }
+// Auto-connect with hardcoded config
+bootApp(FIREBASE_CONFIG);
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
 function render() {
@@ -750,11 +721,7 @@ window.doLogout = async function() {
   if (auth) await signOut(auth);
 };
 
-window.showConfig = function() {
-  document.getElementById('loginScreen').classList.remove('show');
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('configScreen').classList.add('show');
-};
+
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 function setSyncState(state) {
